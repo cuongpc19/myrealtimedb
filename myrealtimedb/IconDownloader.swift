@@ -43,6 +43,7 @@ class IconDownloader : NSObject, NSURLConnectionDataDelegate {
                     }
                     OperationQueue.main.addOperation{
                         // Set appIcon and clear temporary data/image
+                        NSLog("icon object download complete" )
                         self.post?.uiimage = data
                         
                         

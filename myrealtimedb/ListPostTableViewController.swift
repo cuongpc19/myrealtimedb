@@ -76,20 +76,26 @@ class ListPostTableViewController: UITableViewController {
                 // Only load cached images; defer new downloads until scrolling ends
                 if (post.uiimage != nil) {
                     cell.imageView?.image = UIImage(data: post.uiimage!)
-                    
+                    NSLog("uitable cell (has image data): %d", indexPath.row);
                 } else {
-                    if (self.tableView.isDragging == false && self.tableView.isDecelerating == false) {                        
+                    if (self.tableView.isDragging == false && self.tableView.isDecelerating == false) {
+                        NSLog("uitable cell (preparing for download): %d", indexPath.row)
                             self.startIconDownload(post, forIndexPath: indexPath)
-                        
                     }
+                    NSLog("uitable cell (set default image): %d", indexPath.row);
                     cell.imageView?.image = UIImage(named: "test")
+                    
                 }
             }
         }
         
         return cell
     }
-    
+    func performUIUpdatesOnMain(_ updates: @escaping () -> Void) {
+        DispatchQueue.main.async {
+            updates()
+        }
+    }
     private func startIconDownload(_ post: Post, forIndexPath indexPath: IndexPath) {
         var iconDownloader = self.imageDownloadsInProgress[indexPath]
         if iconDownloader == nil {
@@ -97,10 +103,9 @@ class ListPostTableViewController: UITableViewController {
             iconDownloader!.post = post
             iconDownloader!.completionHandler = {[unowned self] in
                 let cell = self.tableView.cellForRow(at: indexPath)
-                guard let appIconData = post.uiimage, let image = UIImage(data: appIconData)?.cropIfNeed(aspectFillToSize: kAppIconSize) else {
-                    return
-                }
-                cell?.imageView?.image = image
+                NSLog("startIconDownload: %d", indexPath.row);
+                cell?.imageView?.image = UIImage(data: post.uiimage!)
+                self.tableView.reloadRows(at: [indexPath], with: .fade)
             }
 
             self.imageDownloadsInProgress[indexPath] = iconDownloader
@@ -191,22 +196,4 @@ class ListPostTableViewController: UITableViewController {
      */
     
 }
-extension UIImage {
-    func cropIfNeed(aspectFillToSize size: CGSize) -> UIImage? {
-        guard self.size != size else {return self}
-        UIGraphicsBeginImageContextWithOptions(size, false , 0.0)
-        let rect = CGRect(origin: CGPoint.zero, size: size)
-        self.draw(in: rect)
-        let image = UIGraphicsGetImageFromCurrentImageContext()
-        UIGraphicsEndImageContext()
-        return image
-    }
-}
 
-// MARK: - CGSize compaire
-
-extension CGSize {
-    static func != (first: CGSize, second: CGSize) -> Bool {
-        return first.width != second.width || first.height != second.height
-    }
-}
