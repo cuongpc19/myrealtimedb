@@ -9,7 +9,7 @@
 import Foundation
 import UIKit
 import Firebase
-public let kAppIconSize = CGSize(width: 150, height: 150)
+public let kAppIconSize  = CGFloat(150)
 class IconDownloader : NSObject, NSURLConnectionDataDelegate {
     
     var post: Post?
@@ -44,7 +44,23 @@ class IconDownloader : NSObject, NSURLConnectionDataDelegate {
                     OperationQueue.main.addOperation{
                         // Set appIcon and clear temporary data/image
                         NSLog("icon object download complete" )
-                        self.post?.uiimage = data
+                        let image = UIImage(data: data!)
+                        if (image!.size.width != kAppIconSize || image?.size.height != kAppIconSize)
+                        {
+                            let itemSize = CGSize(width: kAppIconSize, height: kAppIconSize)
+                            UIGraphicsBeginImageContextWithOptions(itemSize, false, 0.0)
+                             let imageRect = CGRect(x: 0, y: 0, width: itemSize.width, height: itemSize.height)
+                            //[image drawInRect:imageRect];
+                            image?.draw(in: imageRect)
+                            self.post?.uiimage = UIGraphicsGetImageFromCurrentImageContext();
+                            UIGraphicsEndImageContext();
+                        }
+                        else
+                        {
+                            self.post?.uiimage = image;
+                        }
+                        
+                        //self.post?.uiimage = data
                         
                         
                         self.completionHandler?()

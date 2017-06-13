@@ -75,7 +75,7 @@ class ListPostTableViewController: UITableViewController {
                 cell.textLabel?.text = post.body
                 // Only load cached images; defer new downloads until scrolling ends
                 if (post.uiimage != nil) {
-                    cell.imageView?.image = UIImage(data: post.uiimage!)
+                    cell.imageView?.image = post.uiimage
                     NSLog("uitable cell (has image data): %d", indexPath.row);
                 } else {
                     if (self.tableView.isDragging == false && self.tableView.isDecelerating == false) {
@@ -104,7 +104,7 @@ class ListPostTableViewController: UITableViewController {
             iconDownloader!.completionHandler = {[unowned self] in
                 let cell = self.tableView.cellForRow(at: indexPath)
                 NSLog("startIconDownload: %d", indexPath.row);
-                cell?.imageView?.image = UIImage(data: post.uiimage!)
+                cell?.imageView?.image = post.uiimage
                 self.tableView.reloadRows(at: [indexPath], with: .fade)
             }
 

@@ -19,7 +19,7 @@ class Post: NSObject {
     var stars: Dictionary<String, Bool>?
     var image : String
     var isdownloadImg : Int
-    var uiimage: Data?
+    var uiimage: UIImage?
     init(uid: String, author: String, title: String, body: String,image : String,isdownloadImg : Int ) {
         self.uid = uid
         self.author = author
