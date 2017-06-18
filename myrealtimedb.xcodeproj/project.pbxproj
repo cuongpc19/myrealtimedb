@@ -14,11 +14,11 @@
 		444E164E1EEAE4BE00876D33 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 444E164C1EEAE4BE00876D33 /* LaunchScreen.storyboard */; };
 		444E16561EEAE56000876D33 /* GoogleService-Info.plist in Resources */ = {isa = PBXBuildFile; fileRef = 444E16551EEAE56000876D33 /* GoogleService-Info.plist */; };
 		444E16581EEAF45900876D33 /* Post.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444E16571EEAF45900876D33 /* Post.swift */; };
-		444E165B1EEB070500876D33 /* ListPostTableViewController(bak2).swift in Sources */ = {isa = PBXBuildFile; fileRef = 444E165A1EEB070500876D33 /* ListPostTableViewController(bak2).swift */; };
 		444E165D1EEB073500876D33 /* PostTableViewCell.swift in Sources */ = {isa = PBXBuildFile; fileRef = 444E165C1EEB073500876D33 /* PostTableViewCell.swift */; };
 		44641A9B1EEC3EE30036137C /* iOSDevCenters+GIF.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44641A9A1EEC3EE30036137C /* iOSDevCenters+GIF.swift */; };
+		44BEA7281EF6CA4E00EEB23E /* ListPostTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44BEA7271EF6CA4E00EEB23E /* ListPostTableViewController.swift */; };
 		44C91BA81EED979E00F615F8 /* IconDownloader.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C91BA71EED979E00F615F8 /* IconDownloader.swift */; };
-		44C91BAA1EEDAE9C00F615F8 /* ListPostTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C91BA91EEDAE9C00F615F8 /* ListPostTableViewController.swift */; };
+		44C91BAA1EEDAE9C00F615F8 /* ListPostTableViewController(option3).swift in Sources */ = {isa = PBXBuildFile; fileRef = 44C91BA91EEDAE9C00F615F8 /* ListPostTableViewController(option3).swift */; };
 		631B2B49A2639BE10F86EBD5 /* Pods_myrealtimedb.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 583B568219572371AA3E6E1D /* Pods_myrealtimedb.framework */; };
 /* End PBXBuildFile section */
 
@@ -32,11 +32,11 @@
 		444E164F1EEAE4BE00876D33 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		444E16551EEAE56000876D33 /* GoogleService-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "GoogleService-Info.plist"; sourceTree = "<group>"; };
 		444E16571EEAF45900876D33 /* Post.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Post.swift; sourceTree = "<group>"; };
-		444E165A1EEB070500876D33 /* ListPostTableViewController(bak2).swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ListPostTableViewController(bak2).swift"; sourceTree = "<group>"; };
 		444E165C1EEB073500876D33 /* PostTableViewCell.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = PostTableViewCell.swift; sourceTree = "<group>"; };
 		44641A9A1EEC3EE30036137C /* iOSDevCenters+GIF.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "iOSDevCenters+GIF.swift"; sourceTree = "<group>"; };
+		44BEA7271EF6CA4E00EEB23E /* ListPostTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListPostTableViewController.swift; sourceTree = "<group>"; };
 		44C91BA71EED979E00F615F8 /* IconDownloader.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = IconDownloader.swift; sourceTree = "<group>"; };
-		44C91BA91EEDAE9C00F615F8 /* ListPostTableViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ListPostTableViewController.swift; sourceTree = "<group>"; };
+		44C91BA91EEDAE9C00F615F8 /* ListPostTableViewController(option3).swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "ListPostTableViewController(option3).swift"; sourceTree = "<group>"; };
 		450AABB909723F2ECB3D3B5E /* Pods-myrealtimedb.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-myrealtimedb.debug.xcconfig"; path = "Pods/Target Support Files/Pods-myrealtimedb/Pods-myrealtimedb.debug.xcconfig"; sourceTree = "<group>"; };
 		583B568219572371AA3E6E1D /* Pods_myrealtimedb.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_myrealtimedb.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		804A2AEF3CFFBA3593D9FCBE /* Pods-myrealtimedb.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-myrealtimedb.release.xcconfig"; path = "Pods/Target Support Files/Pods-myrealtimedb/Pods-myrealtimedb.release.xcconfig"; sourceTree = "<group>"; };
@@ -80,9 +80,9 @@
 				444E16451EEAE4BE00876D33 /* ViewController.swift */,
 				444E16591EEAF46800876D33 /* Model */,
 				444E16471EEAE4BE00876D33 /* Main.storyboard */,
-				444E165A1EEB070500876D33 /* ListPostTableViewController(bak2).swift */,
+				44BEA7271EF6CA4E00EEB23E /* ListPostTableViewController.swift */,
 				44C91BA71EED979E00F615F8 /* IconDownloader.swift */,
-				44C91BA91EEDAE9C00F615F8 /* ListPostTableViewController.swift */,
+				44C91BA91EEDAE9C00F615F8 /* ListPostTableViewController(option3).swift */,
 				44641A9A1EEC3EE30036137C /* iOSDevCenters+GIF.swift */,
 				444E165C1EEB073500876D33 /* PostTableViewCell.swift */,
 				444E164A1EEAE4BE00876D33 /* Assets.xcassets */,
@@ -244,12 +244,12 @@
 			files = (
 				444E16581EEAF45900876D33 /* Post.swift in Sources */,
 				44C91BA81EED979E00F615F8 /* IconDownloader.swift in Sources */,
-				44C91BAA1EEDAE9C00F615F8 /* ListPostTableViewController.swift in Sources */,
+				44C91BAA1EEDAE9C00F615F8 /* ListPostTableViewController(option3).swift in Sources */,
 				44641A9B1EEC3EE30036137C /* iOSDevCenters+GIF.swift in Sources */,
 				444E16461EEAE4BE00876D33 /* ViewController.swift in Sources */,
 				444E165D1EEB073500876D33 /* PostTableViewCell.swift in Sources */,
 				444E16441EEAE4BE00876D33 /* AppDelegate.swift in Sources */,
-				444E165B1EEB070500876D33 /* ListPostTableViewController(bak2).swift in Sources */,
+				44BEA7281EF6CA4E00EEB23E /* ListPostTableViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
