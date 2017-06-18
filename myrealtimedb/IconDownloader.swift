@@ -19,15 +19,28 @@ class IconDownloader : NSObject, NSURLConnectionDataDelegate {
     func startDownload() {
         let storage = Storage.storage()
         storageRef = storage.reference()
-        let starsRef = self.storageRef.child("images").child((post?.image)!)
-        starsRef.downloadURL { url, error in
+        let starsRef = self.storageRef.child("images").child((post?.image)!)                    
+        // Download in memory with a maximum allowed size of 1MB (1 * 1024 * 1024 bytes)
+       
+        starsRef.getMetadata { metadata, error in
             if let error = error {
+                // Uh-oh, an error occurred!
+            } else {
+                let sizefile = metadata?.size
+                if (sizefile! < 1024){
+                    
+                }
+            }
+        }
+        starsRef.downloadURL { url, error in
+            if error != nil {
                 print("Downloadurl error")
             } else {
                 //self.post?.image = (url?.absoluteString)!
                 let request = URLRequest(url: URL(string: (url?.absoluteString)!)!)
                 //print("url String: \(self.post?.image)")
                 // create an session data task to obtain and download the app icon
+                
                 self.sessionTask = URLSession.shared.dataTask(with: request, completionHandler: {
                     data, response, error in
                     
@@ -41,28 +54,18 @@ class IconDownloader : NSObject, NSURLConnectionDataDelegate {
                             }
                         }
                     }
+                    //print("error download : \(error?.localizedDescription)")
                     OperationQueue.main.addOperation{
                         // Set appIcon and clear temporary data/image
-                        NSLog("icon object download complete" )
-                        let image = UIImage(data: data!)
-                        if (image!.size.width != kAppIconSize || image?.size.height != kAppIconSize)
-                        {
-                            let itemSize = CGSize(width: kAppIconSize, height: kAppIconSize)
-                            UIGraphicsBeginImageContextWithOptions(itemSize, false, 0.0)
-                             let imageRect = CGRect(x: 0, y: 0, width: itemSize.width, height: itemSize.height)
-                            //[image drawInRect:imageRect];
-                            image?.draw(in: imageRect)
-                            self.post?.uiimage = UIGraphicsGetImageFromCurrentImageContext();
-                            UIGraphicsEndImageContext();
-                        }
-                        else
-                        {
+                        //NSLog("icon object download complete" )
+                        if let image = UIImage(data: data!) {
+                            
                             self.post?.uiimage = image;
                         }
-                        
+                        else {
+                        print("ERROR!")
+                        }
                         //self.post?.uiimage = data
-                        
-                        
                         self.completionHandler?()
                     }
                 })

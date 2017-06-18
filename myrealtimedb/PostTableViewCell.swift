@@ -12,8 +12,13 @@ class PostTableViewCell: UITableViewCell {
 
     
     
+    @IBOutlet weak var bodyPost: UILabel!
     
+    @IBOutlet weak var uiImagePost: UIImageView!
     
+    @IBOutlet weak var uiCountLikeLabel: UILabel!
+    
+    @IBOutlet weak var uiCountCommentLabel: UILabel!
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code

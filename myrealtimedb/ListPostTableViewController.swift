@@ -9,12 +9,11 @@
 import UIKit
 import Firebase
 import FirebaseDatabaseUI
-
 class ListPostTableViewController: UITableViewController {
-    var ref: DatabaseReference!
-    //var post: Post = Post()
+    var ref: DatabaseReference!        
+    var post: Post = Post()
     var posts : [Post] = []
-    var storageRef: StorageReference!
+    
     var dataSource: FUITableViewDataSource?
     var thefirstKey : String = ""
     var thefirstIndex : Int = 0
@@ -25,102 +24,86 @@ class ListPostTableViewController: UITableViewController {
         super.viewDidLoad()
         self.imageDownloadsInProgress = [:]
         ref = Database.database().reference()
-        let storage = Storage.storage()
-        storageRef = storage.reference()
-        ref.child("posts").queryOrderedByKey().observeSingleEvent(of: .value, with: { (snapshot) in
-            // Get user value
-            for item in snapshot.children.allObjects  as! [DataSnapshot]{
-                
-                
-                let onepostdb = item.value  as? NSDictionary
-                let post = Post()
-                post.body = onepostdb?["body"] as? String ?? ""
-                post.image = onepostdb?["image"] as? String ?? ""
-                //post.isdownloadImg = 0
-                self.posts.append(post)
+        // Get a reference to the storage service using the default Firebase App
+        dataSource = FUITableViewDataSource.init(query: queryDatabase(lastkey: self.thefirstKey)) { (tableView, indexPath, snap) -> UITableViewCell in
+            let cell = tableView.dequeueReusableCell(withIdentifier: self.CellIdentifier, for: indexPath) as! PostTableViewCell
+            
+            guard let post = Post.init(snapshot: snap) else { return cell }
+            self.posts.append(post)
+            print("body post \(post.body)")
+            print("index Path: \(indexPath.row)")
+            cell.bodyPost?.text = "Loading ..."
+            cell.uiImagePost.image = UIImage(named: "test")
+            if let starCount = post.starCount {
+                cell.uiCountLikeLabel.text = "\(starCount) like"
             }
-            self.tableView.reloadData()
             
-        }) { (error) in
-            print(error.localizedDescription)
-        }
-    }
-    override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        // #warning Incomplete implementation, return the number of rows
-        let count = self.posts.count
-        
-        // if there's no data yet, return enough rows to fill the screen
-        if count == 0 {
-            return 1
-        }
-        return count
-    }
-    
-    
-    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        var cell : UITableViewCell!
-        
-        let nodeCount = self.posts.count
-        
-        if nodeCount == 0 && indexPath.row == 0 {
-            // add a placeholder cell while waiting on table data
-            cell = tableView.dequeueReusableCell(withIdentifier: PlaceHolderCellIdentifier, for: indexPath)
-        } else {
-            cell = tableView.dequeueReusableCell(withIdentifier: CellIdentifier, for: indexPath)
-            
-            // Leave cells empty if there's no data yet
-            if nodeCount > 0 {
-                // Set up the cell representing the app
-                let post = self.posts[indexPath.row]
-                cell.textLabel?.text = post.body
-                // Only load cached images; defer new downloads until scrolling ends
-                if (post.uiimage != nil) {
-                    cell.imageView?.image = post.uiimage
-                    NSLog("uitable cell (has image data): %d", indexPath.row);
-                } else {
-                    if (self.tableView.isDragging == false && self.tableView.isDecelerating == false) {
-                        NSLog("uitable cell (preparing for download): %d", indexPath.row)
-                            self.startIconDownload(post, forIndexPath: indexPath)
-                    }
-                    NSLog("uitable cell (set default image): %d", indexPath.row);
-                    cell.imageView?.image = UIImage(named: "test")
-                    
+            if (self.posts[indexPath.row].uiimage == nil) {
+                
+                self.performUIUpdatesOnMain {
+                    self.startIconDownload(post, forIndexPath: indexPath)
                 }
+            } else {
+                cell.bodyPost?.text = post.body
+                cell.uiImagePost?.image = self.posts[indexPath.row].uiimage
             }
+            
+            
+            return cell
         }
-        
-        return cell
+        dataSource?.bind(to: tableView)
+        tableView.delegate = self
     }
+    
     func performUIUpdatesOnMain(_ updates: @escaping () -> Void) {
         DispatchQueue.main.async {
             updates()
         }
     }
+   
+    func queryDatabase(lastkey : String) -> DatabaseQuery {
+        //print("lastkey  in query: \(lastkey)")
+        //return(self.ref.child("posts")).queryOrderedByKey().queryStarting(atValue: lastkey).queryLimited(toLast: 100)
+        return(self.ref.child("posts")).queryOrderedByKey()
+    }
+    
+
+    
     private func startIconDownload(_ post: Post, forIndexPath indexPath: IndexPath) {
         var iconDownloader = self.imageDownloadsInProgress[indexPath]
         if iconDownloader == nil {
             iconDownloader = IconDownloader()
             iconDownloader!.post = post
             iconDownloader!.completionHandler = {[unowned self] in
-                let cell = self.tableView.cellForRow(at: indexPath)
-                NSLog("startIconDownload: %d", indexPath.row);
-                cell?.imageView?.image = post.uiimage
-                self.tableView.reloadRows(at: [indexPath], with: .fade)
+                
+                guard let cell = self.tableView.cellForRow(at: indexPath) as? PostTableViewCell
+                    else {
+                    // Value requirements not met, do something
+                    return
+                }
+                //guard let cell = self.tableView.cellForRow(at: indexPath) as! PostTableViewCell
+                //NSLog("startIconDownload: %d", indexPath.row);
+                cell.uiImagePost?.image = post.uiimage
+                cell.bodyPost?.text = post.body
+                self.posts[indexPath.row].uiimage = post.uiimage
+                self.posts[indexPath.row].body = post.body
+                //self.tableView.reloadRows(at: [indexPath], with: .fade)
             }
-
+            
             self.imageDownloadsInProgress[indexPath] = iconDownloader
             iconDownloader!.startDownload()
         }
     }
-    
+
+
     
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    
+
     // MARK: - Table view data source
-    
+
     private func loadImagesForOnscreenRows() {
         if !self.posts.isEmpty {
             let visiblePaths = self.tableView.indexPathsForVisibleRows!
@@ -129,8 +112,14 @@ class ListPostTableViewController: UITableViewController {
                 
                 // Avoid the app icon download if the app already has an icon
                 if post.uiimage == nil {
-                    self.startIconDownload(post, forIndexPath: indexPath)
+                    self.performUIUpdatesOnMain {
+                        self.startIconDownload(post, forIndexPath: indexPath)
+                        //self.tableView.reloadRows(at: [indexPath], with: .fade)
+                    }
+                    
+                    
                 }
+                
             }
         }
     }
@@ -140,60 +129,59 @@ class ListPostTableViewController: UITableViewController {
             self.loadImagesForOnscreenRows()
         }
     }
-    override func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
+     override func scrollViewDidEndDecelerating(_ scrollView: UIScrollView) {
         self.loadImagesForOnscreenRows()
     }
-    
-    
+
+
     
     override func viewWillAppear(_ animated: Bool) {
         //self.tableView.reloadData()
     }
-    
-    /*
-     // Override to support conditional editing of the table view.
-     override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
-     // Return false if you do not want the specified item to be editable.
-     return true
-     }
-     */
-    
-    /*
-     // Override to support editing the table view.
-     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
-     if editingStyle == .delete {
-     // Delete the row from the data source
-     tableView.deleteRows(at: [indexPath], with: .fade)
-     } else if editingStyle == .insert {
-     // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-     }
-     }
-     */
-    
-    /*
-     // Override to support rearranging the table view.
-     override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
-     
-     }
-     */
-    
-    /*
-     // Override to support conditional rearranging of the table view.
-     override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
-     // Return false if you do not want the item to be re-orderable.
-     return true
-     }
-     */
-    
-    /*
-     // MARK: - Navigation
-     
-     // In a storyboard-based application, you will often want to do a little preparation before navigation
-     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destinationViewController.
-     // Pass the selected object to the new view controller.
-     }
-     */
-    
-}
 
+    /*
+    // Override to support conditional editing of the table view.
+    override func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
+        // Return false if you do not want the specified item to be editable.
+        return true
+    }
+    */
+
+    /*
+    // Override to support editing the table view.
+    override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCellEditingStyle, forRowAt indexPath: IndexPath) {
+        if editingStyle == .delete {
+            // Delete the row from the data source
+            tableView.deleteRows(at: [indexPath], with: .fade)
+        } else if editingStyle == .insert {
+            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
+        }    
+    }
+    */
+
+    /*
+    // Override to support rearranging the table view.
+    override func tableView(_ tableView: UITableView, moveRowAt fromIndexPath: IndexPath, to: IndexPath) {
+
+    }
+    */
+
+    /*
+    // Override to support conditional rearranging of the table view.
+    override func tableView(_ tableView: UITableView, canMoveRowAt indexPath: IndexPath) -> Bool {
+        // Return false if you do not want the item to be re-orderable.
+        return true
+    }
+    */
+
+    /*
+    // MARK: - Navigation
+
+    // In a storyboard-based application, you will often want to do a little preparation before navigation
+    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
+        // Get the new view controller using segue.destinationViewController.
+        // Pass the selected object to the new view controller.
+    }
+    */
+
+}

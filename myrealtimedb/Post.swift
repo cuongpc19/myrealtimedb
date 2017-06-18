@@ -6,7 +6,6 @@
 //  Copyright © 2017 cuongpc. All rights reserved.
 //
 
-import Foundation
 import UIKit
 import Firebase
 
@@ -15,19 +14,18 @@ class Post: NSObject {
     var author: String
     var title: String
     var body: String
+    var image: String
     var starCount: AnyObject?
     var stars: Dictionary<String, Bool>?
-    var image : String
-    var isdownloadImg : Int
     var uiimage: UIImage?
-    init(uid: String, author: String, title: String, body: String,image : String,isdownloadImg : Int ) {
+    
+    init(uid: String, author: String, title: String, body: String, image : String) {
         self.uid = uid
         self.author = author
         self.title = title
         self.body = body
-        self.starCount = 0 as AnyObject?
         self.image = image
-        self.isdownloadImg = isdownloadImg
+        self.starCount = 0 as AnyObject?
     }
     
     init?(snapshot: DataSnapshot) {
@@ -35,19 +33,20 @@ class Post: NSObject {
         guard let uid  = dict["uid"]  else { return nil }
         guard let author = dict["author"] else { return nil }
         guard let title = dict["title"] else { return nil }
-        guard let body = dict["body"] else { return nil }        
+        guard let body = dict["body"] else { return nil }
         guard let image = dict["image"] else { return nil }
+        guard let starCount = dict["starCount"] else { return nil }
         
         self.uid = uid
         self.author = author
         self.title = title
         self.body = body
-        self.starCount = 0 as AnyObject?
         self.image = image
-        self.isdownloadImg = 0
+        self.starCount = starCount as AnyObject?
     }
     
     convenience override init() {
-        self.init(uid: "", author: "", title: "", body:  "",image : "",isdownloadImg : 0)
+        self.init(uid: "", author: "", title: "", body:  "",image : "")
     }
 }
+
