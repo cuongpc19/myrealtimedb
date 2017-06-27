@@ -9,6 +9,7 @@ target 'myrealtimedb' do
 	pod 'Firebase/Core'
 	pod 'Firebase/Database'
 	pod 'Firebase/Storage'
+	pod 'Firebase/Auth'
 	#platform:ios, '8.0'
 	#use_framworks!
 	pod 'FirebaseUI/Database','~> 3.0'

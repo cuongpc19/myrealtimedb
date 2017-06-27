@@ -7,7 +7,7 @@
 //
 
 import UIKit
-
+import Firebase
 class PostTableViewCell: UITableViewCell {
 
     
@@ -19,8 +19,15 @@ class PostTableViewCell: UITableViewCell {
     @IBOutlet weak var uiCountLikeLabel: UILabel!
     
     @IBOutlet weak var uiCountCommentLabel: UILabel!
+    
+    
+    
+    @IBOutlet weak var likeButton: ButtonWithKey!
+    
+    @IBOutlet weak var commentButton: ButtonWithKey!
     override func awakeFromNib() {
         super.awakeFromNib()
+        
         // Initialization code
     }
 
@@ -29,5 +36,27 @@ class PostTableViewCell: UITableViewCell {
 
         // Configure the view for the selected state
     }
-
+    
+    func checkIsLogin() -> Bool {
+        var islogin = false
+        if  Auth.auth().currentUser != nil {
+            islogin = true
+        } else {
+            islogin = false
+        }
+        return islogin
+    }
+    
+   
+    
+    @IBAction func commentClickAction(_ sender: Any) {
+    }
+    
+    @IBAction func downloadClickAction(_ sender: Any) {
+    }
+    
+    @IBAction func shareClickAction(_ sender: Any) {
+    }
+    
+    
 }

@@ -9,12 +9,12 @@
 import UIKit
 import Firebase
 import FirebaseDatabaseUI
-class ListPostTableViewController: UITableViewController {
-    var ref: DatabaseReference!
+class ListPostTableViewController: ExTableVC {
+    
     var post: Post = Post()
     var posts : [Post] = []
     
-    var dataSource: FUITableViewDataSource?
+    
     var thefirstKey : String = ""
     var thefirstIndex : Int = 0
     private var imageDownloadsInProgress: [IndexPath: IconDownloader] = [:]
@@ -25,19 +25,35 @@ class ListPostTableViewController: UITableViewController {
         self.imageDownloadsInProgress = [:]
         ref = Database.database().reference()
         // Get a reference to the storage service using the default Firebase App
-        dataSource = FUITableViewDataSource.init(query: queryDatabase(lastkey: self.thefirstKey)) { (tableView, indexPath, snap) -> UITableViewCell in
+        dataSource = FUITableViewDataSource.init(query: getQuery()) { (tableView, indexPath, snap) -> UITableViewCell in
             let cell = tableView.dequeueReusableCell(withIdentifier: self.CellIdentifier, for: indexPath) as! PostTableViewCell
+            cell.likeButton.key = snap.key
+            cell.commentButton.key = snap.key
+            guard let post = Post.init(snapshot: snap) else {
+                return cell }
             
-            guard let post = Post.init(snapshot: snap) else { return cell }
             self.posts.append(post)
-            print("body post \(post.body)")
-            print("index Path: \(indexPath.row)")
+            //print("snap key \(snap.key)")
+            cell.likeButton.setImage(UIImage(named: "like"), for: .normal)
+            self.postRef = Database.database().reference().child("posts").child(snap.key).child("stars").child(self.getUid())
+            self.postRef.observe(DataEventType.value, with: { (snapshot) in
+                guard let postDict = snapshot.value as? Bool else {
+                    cell.likeButton.setImage(UIImage(named: "like"), for: .normal)
+                    return}
+                    cell.likeButton.setImage(UIImage(named: "liked"), for: .normal)
+                
+            })
+            
+            //cell.likeButton.setImage(UIImage.init(named: imageName), for: .normal)
             cell.bodyPost?.text = "Loading ..."
             cell.uiImagePost.image = UIImage(named: "test")
             if let starCount = post.starCount {
                 cell.uiCountLikeLabel.text = "\(starCount) like"
             }
-            
+            cell.uiCountCommentLabel.text = "0 comment"
+            if let commentCount = post.commentCount {
+                cell.uiCountCommentLabel.text = "\(commentCount) comments"
+            }
             if (self.posts[indexPath.row].uiimage == nil) {
                 
                 self.performUIUpdatesOnMain {
@@ -45,7 +61,7 @@ class ListPostTableViewController: UITableViewController {
                 }
             } else {
                 cell.bodyPost?.text = post.body
-                cell.uiImagePost?.image = self.posts[indexPath.row].uiimage
+                cell.uiImagePost?.image =  self.posts[indexPath.row].uiimage
             }
             
             
@@ -60,13 +76,6 @@ class ListPostTableViewController: UITableViewController {
             updates()
         }
     }
-    
-    func queryDatabase(lastkey : String) -> DatabaseQuery {
-        //print("lastkey  in query: \(lastkey)")
-        //return(self.ref.child("posts")).queryOrderedByKey().queryStarting(atValue: lastkey).queryLimited(toLast: 100)
-        return(self.ref.child("posts")).queryOrderedByKey()
-    }
-    
     
     
     private func startIconDownload(_ post: Post, forIndexPath indexPath: IndexPath) {
@@ -97,6 +106,58 @@ class ListPostTableViewController: UITableViewController {
     
     
     
+    
+    @IBAction func likeClickAction(_ sender: Any) {
+        if (self.checkIsLogin() == true) {
+            guard let likeButton = sender as? ButtonWithKey else {
+               fatalError("Chung toi rat tiec vi xay ra loi.")
+            }
+            let postKey = likeButton.key
+            //print("current Key uid: \(postKey)")
+            postRef = Database.database().reference().child("posts").child(postKey!)
+            incrementStars(forRef: postRef)
+            
+        } else {
+            let vc = self.storyboard?.instantiateViewController(withIdentifier: "FbLoginViewController") as! FbLoginViewController
+            self.present(vc, animated: true, completion: nil)
+
+        }
+        
+    }
+    
+    func incrementStars(forRef ref: DatabaseReference) {
+        // [START post_stars_transaction]
+        ref.runTransactionBlock({ (currentData: MutableData) -> TransactionResult in
+            if var post = currentData.value as? [String : AnyObject], let uid = Auth.auth().currentUser?.uid {
+                var stars: Dictionary<String, Bool>
+                stars = post["stars"] as? [String : Bool] ?? [:]
+                var starCount = post["starCount"] as? Int ?? 0
+                
+                if let _ = stars[uid] {
+                    // Unstar the post and remove self from stars
+                    starCount -= 1
+                    stars.removeValue(forKey: uid)
+                } else {
+                    // Star the post and add self to stars
+                    starCount += 1
+                    stars[uid] = true
+                }
+                post["starCount"] = starCount as AnyObject?
+                post["stars"] = stars as AnyObject?
+                
+                // Set value and report transaction success
+                currentData.value = post
+                
+                return TransactionResult.success(withValue: currentData)
+            }
+            return TransactionResult.success(withValue: currentData)
+        }) { (error, committed, snapshot) in
+            if let error = error {
+                print(error.localizedDescription)
+            }
+        }
+        // [END post_stars_transaction]
+    }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
@@ -134,7 +195,10 @@ class ListPostTableViewController: UITableViewController {
     }
     
     
-    
+    func getQuery() -> DatabaseQuery {
+        let recentPostsQuery = (ref?.child("posts").queryLimited(toFirst: 100))!
+        return(recentPostsQuery)
+    }
     override func viewWillAppear(_ animated: Bool) {
         //self.tableView.reloadData()
     }
@@ -174,14 +238,32 @@ class ListPostTableViewController: UITableViewController {
      }
      */
     
-    /*
+    
      // MARK: - Navigation
      
      // In a storyboard-based application, you will often want to do a little preparation before navigation
      override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-     // Get the new view controller using segue.destinationViewController.
-     // Pass the selected object to the new view controller.
+        super.prepare(for: segue, sender: sender)
+        switch(segue.identifier ?? "") {
+        case "showComment":
+            guard let postdetailVC = segue.destination as? ListCommentPostTableVC else {
+                fatalError("Unexpected destination: \(segue.destination)")
+            }
+            
+            guard let commentButton = sender as? ButtonWithKey else {
+                fatalError("Unexpected sender: \(sender)")
+            }
+            
+            let keyPost = commentButton.key
+                        
+            postdetailVC.key = keyPost
+            
+            
+        default:
+            fatalError("Unexpected Segue Identifier; \(segue.identifier)")
+        }
+    
      }
-     */
+    
     
 }
